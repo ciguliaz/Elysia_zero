@@ -3,12 +3,18 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.7.3"
   },
   "dependencies": {
-    "elysia": "^1.2.10"
+    "@elysiajs/jwt": "^1.2.0",
+    "@elysiajs/websocket": "^0.2.8",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.7",
+    "elysia": "^1.2.10",
+    "mongoose": "^8.9.6"
   }
 }
