@@ -2,9 +2,13 @@
   "name": "elysia_zero",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "bun run src/index.ts"
+  },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
-    "@types/bun": "latest"
+    "@types/bun": "^1.2.2"
   },
   "peerDependencies": {
     "typescript": "^5.7.3"
@@ -14,7 +18,7 @@
     "@elysiajs/websocket": "^0.2.8",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.7",
-    "elysia": "^1.2.10",
+    "elysia": "^1.2.11",
     "mongoose": "^8.9.6"
   }
 }
