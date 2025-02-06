@@ -9,7 +9,7 @@ export const authenticate = new Elysia()
 			secret: process.env.JWT_SECRET!, // Secret key for signing and verifying JWT
 		})
 	)
-	//! Middleware that runs before request handling, ensuring the Authorization header exists
+	//* Middleware that runs before request handling, ensuring the Authorization header exists
 	.onBeforeHandle(({ headers, set }) => {
 		if (!headers.authorization) {
 			set.status = 401;
@@ -17,7 +17,7 @@ export const authenticate = new Elysia()
 		}
 	})
 	// Derives user data by verifying the JWT token
-	.derive(
+	.derive( // https://elysiajs.com/essential/handler.html#derive
 		async ({
 			jwt,
 			headers,
@@ -27,18 +27,19 @@ export const authenticate = new Elysia()
 			headers: { authorization?: string }; // `authorization` header is optional but checked earlier
 			set: any;
 		}) => {
-			const token = headers.authorization?.split(" ")[1]; //! Extracts token from "Bearer <token>"
+			const token = headers.authorization?.split(" ")[1]; //* Extracts token from "Bearer <token>"
 			if (!token) {
 				set.status = 401; //Unauthorized
 				return { error: "Unauthorized" }; // Rejects requests without a token
 			}
 
-			const user = await jwt.verify(token); //! Verifies the JWT token
-			if (!user) {
+			try {
+				const user = await jwt.verify(token); //* Verifies the JWT token
+				if (user) return { user }; // Returns the decoded user data
+			} finally {
 				set.status = 403; //Forbidden
 				return { error: "Invalid token" }; // Rejects invalid tokens
 			}
 
-			return { user }; // Returns the decoded user data
 		}
 	);
