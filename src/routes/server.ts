@@ -11,7 +11,7 @@ interface UserType {
 
 const serverRoutes = authenticate
 
-	//? Create a new server
+	//! Create a new server --------------
 	.post('/server', async ({ body, user }: { body: any; user: UserType }) => {
 		if (!user) return { error: "Unauthorized" };  //  Ensure user is defined
 		const { name, description } = body as { name: string; description?: string } //* good
@@ -23,7 +23,7 @@ const serverRoutes = authenticate
 		body: t.Object({ name: t.String(), description: t.Optional(t.String()) })
 	})
 
-	//? Join
+	//! Join -----------------
 	.post('/server/join', async ({ body, user }: { body: any; user: UserType }) => {
 		const { serverId } = body as { serverId: string }
 		const server = await Server.findById(serverId)
@@ -43,7 +43,7 @@ const serverRoutes = authenticate
 		body: t.Object({ serverId: t.String() })
 	})
 
-	//? Leave
+	//! Leave -------------------
 	.post("/server/leave", async ({ body, user }: { body: any; user: UserType }) => {
 		const { serverId } = body as { serverId: string };
 
@@ -59,7 +59,7 @@ const serverRoutes = authenticate
 		body: t.Object({ serverId: t.String() })
 	})
 
-	//? Get server this user is part of
+	//! Get server this user is part of --------------
 	.get('/servers', async ({ user }: { user: UserType }) => {
 		const servers = await Server.find({ member: user.id })
 		return { success: true, servers }
