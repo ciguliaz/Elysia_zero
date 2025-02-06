@@ -37,3 +37,10 @@ export const logDaR = (msg: string): string => logR(msg, 34);
 * @returns A formatted string with red color.
 */
 export const logErR = (msg: string): string => logR(msg, 91);
+
+/**
+* Logs an **error** message in red.
+* @param msg - The message to log.
+* @returns A formatted string with red color.
+*/
+export const logLiR = (msg: string): string => logR(msg, 94);
