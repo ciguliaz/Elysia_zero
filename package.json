@@ -20,6 +20,7 @@
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.7",
     "elysia": "^1.2.11",
-    "mongoose": "^8.9.6"
+    "mongoose": "^8.9.6",
+    "path": "^0.12.7"
   }
 }
