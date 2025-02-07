@@ -1,9 +1,8 @@
-import { Elysia, t } from "elysia";
+import { t } from "elysia";
+import { authenticate } from "../middleware/auth";
 import Channel from "../models/Channel";
 import Server from "../models/Server";
-import { authenticate } from "../middleware/auth";
-import { server } from "typescript";
-import { set } from "mongoose";
+
 
 interface UserType { //TODO: refractor this shit to ../middleware/auth.ts
 	id: any;
@@ -78,5 +77,9 @@ const channelRoutes = authenticate
 	}, {
 		body: t.Object({ channelId: t.String() }),
 	})
+	// .post('/test', () => {
+	// 	console.log('testing')
+	// 	return { success: true }
+	// })
 
 export default channelRoutes;

@@ -3,7 +3,7 @@
  * @param args - The first argument is the message, followed by ANSI color codes.
  * @returns A formatted string with ANSI color codes.
  */
-export const logR = (msg: string, ...colors: (number | string)[]): string => {
+export const Raw = (msg: string, ...colors: (number | string)[]): string => {
 	if (!colors.length) return msg;
 	const colorCode = colors.join(";");
 	return `\x1b[${colorCode}m${msg}\x1b[0m`;
@@ -13,8 +13,8 @@ export const logR = (msg: string, ...colors: (number | string)[]): string => {
 * Logs a message to the console with ANSI colors.
 * @param args - Arguments passed to `logR`, starting with a message and optional color codes.
 */
-export const logCustom = (...args: Parameters<typeof logR>) => {
-	console.log(logR(...args));
+export const Custom = (...args: Parameters<typeof Raw>) => {
+	console.log(Raw(...args));
 };
 
 /**
@@ -23,32 +23,32 @@ export const logCustom = (...args: Parameters<typeof logR>) => {
 * @returns A formatted string with special format
 * .
 */
-export const logEly = (msg: string): string => logR(msg, 3, 31);
+export const Ely = (msg: string): string => Raw(msg, 3, 31);
 
 /**
 * Logs an **ID** message in orange.
 * @param msg - The message to log.
 * @returns A formatted string with orange color.
 */
-export const logIdR = (msg: string): string => logR(msg, 33);
+export const IdR = (msg: string): string => Raw(msg, 33);
 
 /**
 * Logs a **date** message in purple.
 * @param msg - The message to log.
 * @returns A formatted string with purple color.
 */
-export const logDaR = (msg: string): string => logR(msg, 34);
+export const DaR = (msg: string): string => Raw(msg, 34);
 
 /**
 * Logs an **error** message in red.
 * @param msg - The message to log.
 * @returns A formatted string with red color.
 */
-export const logErR = (msg: string): string => logR(msg, 91);
+export const ErR = (msg: string): string => Raw(msg, 91);
 
 /**
 * Logs an **error** message in red.
 * @param msg - The message to log.
 * @returns A formatted string with red color.
 */
-export const logLiR = (msg: string): string => logR(msg, 94);
+export const LiR = (msg: string): string => Raw(msg, 94);

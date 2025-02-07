@@ -1,23 +1,27 @@
-import { Elysia, t } from 'elysia'
-import Server from '../models/Server'
-import User from '../models/User'
-import { authenticate } from '../middleware/auth'
+import { t } from 'elysia';
+import { authenticate } from '../middleware/auth';
+import Server from '../models/Server';
+import User from '../models/User';
 
+import * as log from '../utils/log';
 
 interface UserType {
 	id: any;
 }
 
-
 const serverRoutes = authenticate
 
 	//! Create a new server --------------
-	.post('/server', async ({ body, user }: { body: any; user: UserType }) => {
-		if (!user) return { error: "Unauthorized" };  //  Ensure user is defined
-		const { name, description } = body as { name: string; description?: string } //* good
+	.post('/server', async ({ body, user }: { body: any; user: UserType }) => {  //* Tested - GOOD
+		if (!user) {
+			log.WithTime(`${log.ErR('Failed getting user')}: ${user}`)
+			return { error: "Unauthorized" };  //  Ensure user is defined
+		}
+		const { name, description } = body as { name: string; description?: string }
 
 		const server = await Server.create({ name, description, owner: user.id, member: [user.id] })
 		await User.findByIdAndUpdate(user.id, { $push: { servers: server._id } })
+		log.WithTime(`Server Created: ${log.Raw(name, 96)} \n`)
 		return { success: true, server }
 	}, {
 		body: t.Object({ name: t.String(), description: t.Optional(t.String()) })

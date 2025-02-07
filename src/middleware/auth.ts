@@ -30,16 +30,20 @@ export const authenticate = new Elysia()
 			const token = headers.authorization?.split(" ")[1]; //* Extracts token from "Bearer <token>"
 			if (!token) {
 				set.status = 401; //Unauthorized
+				console.log('sus1 - no token - unauthorized')
 				return { error: "Unauthorized" }; // Rejects requests without a token
 			}
 
 			try {
 				const user = await jwt.verify(token); //* Verifies the JWT token
-				if (user) return { user }; // Returns the decoded user data
-			} finally {
+				if (user) {
+					console.log(user)
+					return { user }; // Returns the decoded user data
+				}
+			} catch {
 				set.status = 403; //Forbidden
+				console.log('sus2 - bad token - forbidden')
 				return { error: "Invalid token" }; // Rejects invalid tokens
 			}
-
 		}
 	);

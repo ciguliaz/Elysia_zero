@@ -1,8 +1,7 @@
-import { Elysia, t } from "elysia";
 import jwt from "@elysiajs/jwt";
-import { register, login } from "../controllers/authController";
-import { logR, logEly, logDaR, logIdR, logLiR } from '../utils/logFormat';
-import { timestamps, logWithTime } from '../utils/log';
+import { Elysia, t } from "elysia";
+import { login, register } from "../controllers/authController";
+import * as log from '../utils/log';
 
 
 const authRoutes =
@@ -32,7 +31,7 @@ const authRoutes =
 			Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1YzZlMWFhZjJkMTIzNDU2Nzg5YWJjZCIsInVzZXJuYW1lIjoiam9obl9kb2UifQ.sJ5G_qPxr9Abg-QZK1Nk-Tp7T6z3...
 			*/
 			const token = await jwt.sign({ id: user._id.toString(), username: user.username })
-			logWithTime(`${logR('token', 32)} of ${logR(user.username, 96)}: ${token}`)
+			log.WithTime(`${log.Raw('token', 32)} of ${log.Raw(user.username, 96)}: ${token}`)
 			return { token }
 		}, {
 			body: t.Object({

@@ -1,7 +1,7 @@
-import User from '../models/User'
-import bcrypt from 'bcryptjs'
-import { logR, logEly, logDaR, logIdR, logLiR, logErR } from '../utils/logFormat';
-import { timestamps, logWithTime } from '../utils/log';
+import bcrypt from 'bcryptjs';
+import User from '../models/User';
+import { WithTime } from '../utils/log';
+import { ErR, Raw } from '../utils/logFormat';
 
 //TODO: handle duplicate username register
 export const register = async (username: string, password: string) => {
@@ -16,8 +16,8 @@ export const login = async (username: string, password: string) => {
 	if (!user) return null
 	const isMatch = await bcrypt.compare(password, user.password)
 	isMatch
-		? logWithTime(`New user logged in: ${logR('"', 32) + username + logR('"', 32) + logR('||', 32) + logR('"', 32) + password + logR('"', 32)}`)
-		: logWithTime(`New user logged, ${logErR('Wrong Credentials')}: ${logR('"', 32) + username + logR('"', 32) + logR('||', 32) + logR('"', 32) + password + logR('"', 32)}`)
+		? WithTime(`New user logged in: ${Raw('"', 32) + username + Raw('"', 32) + Raw('||', 32) + Raw('"', 32) + password + Raw('"', 32)}`)
+		: WithTime(`New user logged, ${ErR('Wrong Credentials')}: ${Raw('"', 32) + username + Raw('"', 32) + Raw('||', 32) + Raw('"', 32) + password + Raw('"', 32)}`)
 	return isMatch ? user : null
 }
 
