@@ -6,7 +6,7 @@ import { swagger } from '@elysiajs/swagger';
 import authRoutes from './routes/auth';
 import serverRoutes from './routes/server';
 import chat from './routes/chat';
-import { logDaR, logIdR, logLiR } from './utils/logFormat';
+import { logR, logEly, logDaR, logIdR, logLiR } from './utils/logFormat';
 import { timestamps, logWithTime } from './utils/log';
 
 dotenv.config();
@@ -24,5 +24,5 @@ app
 	.use(chat)
 	.listen(3000);
 
-logWithTime('Server is running on ' + logLiR('http://localhost:3000'));
-logWithTime('Swagger server is running on '+logLiR('http://localhost:3000/swagger'));
+logWithTime(logEly('Elysia greeting ~') + ' on ' + logLiR('http://localhost:3000'));
+logWithTime('Swagger server is running on ' + logLiR('http://localhost:3000/swagger'));

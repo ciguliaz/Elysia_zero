@@ -18,6 +18,14 @@ export const logCustom = (...args: Parameters<typeof logR>) => {
 };
 
 /**
+* Logs a **special** message in *Italic* and pink color.
+* @param msg - The message to log.
+* @returns A formatted string with special format
+* .
+*/
+export const logEly = (msg: string): string => logR(msg, 3, 31);
+
+/**
 * Logs an **ID** message in orange.
 * @param msg - The message to log.
 * @returns A formatted string with orange color.
