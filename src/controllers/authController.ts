@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import User from '../models/User';
-import { WithTime } from '../utils/log';
+import * as log from '../utils/log';
 import { ErR, Raw } from '../utils/logFormat';
 
 //TODO: handle duplicate username register
@@ -16,8 +16,8 @@ export const login = async (username: string, password: string) => {
 	if (!user) return null
 	const isMatch = await bcrypt.compare(password, user.password)
 	isMatch
-		? WithTime(`New user logged in: ${Raw('"', 32) + username + Raw('"', 32) + Raw('||', 32) + Raw('"', 32) + password + Raw('"', 32)}`)
-		: WithTime(`New user logged, ${ErR('Wrong Credentials')}: ${Raw('"', 32) + username + Raw('"', 32) + Raw('||', 32) + Raw('"', 32) + password + Raw('"', 32)}`)
+		? log.stamp(`New user logged in: ${Raw('"', 32) + username + Raw('"', 32) + Raw('||', 32) + Raw('"', 32) + password + Raw('"', 32)}`)
+		: log.stamp(`New user logged, ${ErR('Wrong Credentials')}: ${Raw('"', 32) + username + Raw('"', 32) + Raw('||', 32) + Raw('"', 32) + password + Raw('"', 32)}`)
 	return isMatch ? user : null
 }
 

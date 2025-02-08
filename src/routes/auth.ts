@@ -31,7 +31,7 @@ const authRoutes =
 			Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1YzZlMWFhZjJkMTIzNDU2Nzg5YWJjZCIsInVzZXJuYW1lIjoiam9obl9kb2UifQ.sJ5G_qPxr9Abg-QZK1Nk-Tp7T6z3...
 			*/
 			const token = await jwt.sign({ id: user._id.toString(), username: user.username })
-			log.WithTime(`${log.Raw('token', 32)} of ${log.Raw(user.username, 96)}: ${token}`)
+			log.stamp(log.PathR() + `${log.Raw('token', 32)} of ${log.Raw(user.username, 96)}: ${token}`)
 			return { token }
 		}, {
 			body: t.Object({
