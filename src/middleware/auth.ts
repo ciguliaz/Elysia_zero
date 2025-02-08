@@ -1,5 +1,6 @@
 import { Elysia, t } from "elysia";
 import { jwt } from "@elysiajs/jwt";
+import * as log from '../utils/log'
 
 export const authenticate = new Elysia()
 	// Use the JWT plugin and configure it with a secret key
@@ -18,6 +19,7 @@ export const authenticate = new Elysia()
 	})
 	// Derives user data by verifying the JWT token
 	.derive( // https://elysiajs.com/essential/handler.html#derive
+		{ as: 'scoped' }, //! THIS IS REQUIRED, OMITTING THIS WILL PREVENT DERIVER THE USER
 		async ({
 			jwt,
 			headers,
@@ -26,24 +28,25 @@ export const authenticate = new Elysia()
 			jwt: { verify: (token: string) => Promise<any> }; // Ensures `jwt` has a `verify` function
 			headers: { authorization?: string }; // `authorization` header is optional but checked earlier
 			set: any;
+			body: any
 		}) => {
+			log.stamp(log.PathR() + 'Deriving Token')
 			const token = headers.authorization?.split(" ")[1]; //* Extracts token from "Bearer <token>"
 			if (!token) {
 				set.status = 401; //Unauthorized
-				console.log('sus1 - no token - unauthorized')
+				log.stamp(log.PathR() + log.ErR('No token - Unauthorized'))
 				return { error: "Unauthorized" }; // Rejects requests without a token
 			}
 
 			try {
 				const user = await jwt.verify(token); //* Verifies the JWT token
 				if (user) {
-					console.log(user)
 					return { user }; // Returns the decoded user data
 				}
 			} catch {
 				set.status = 403; //Forbidden
-				console.log('sus2 - bad token - forbidden')
+				log.stamp(log.PathR() + log.ErR('Bad token - Forbidden'))
 				return { error: "Invalid token" }; // Rejects invalid tokens
 			}
 		}
-	);
+	)
