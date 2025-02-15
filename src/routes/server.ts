@@ -85,7 +85,7 @@ const serverRoutes =
 		})
 
 		//! Get server this user is part of --------------
-		.get('/servers', async ({ user }: { user: UserType }) => {
+		.get('/servers', async ({ user }: { user: UserType }) => {  //* Tested - GOOD
 			log.stamp(log.PathR() + 'Getting Servers list')
 			const thisUser = await User.findById(user.id);
 			if (!thisUser) return { error: "User not found" }
@@ -102,7 +102,7 @@ const serverRoutes =
 			log.stamp(log.PathR() + `Purging Servers`)
 			const { name } = body as { name: string };
 
-			const deletedServers = await Server.find({ name: name, _id: { $ne: '67a63d62a32648fa87fd17f2' } }).select('_id');
+			const deletedServers = await Server.find({ name: name, _id: { $ne: '67a63d62a32648fa87fd17f2' } }).select('_id'); //$ne: query for 'not equal'
 
 			const deleteResult = await Server.deleteMany({ name: name, _id: { $ne: '67a63d62a32648fa87fd17f2' } })
 			// log.stamp(log.PathR() + `Purged ${ log.IdR(deleteResult.deletedCount.toString()) } Servers`)
