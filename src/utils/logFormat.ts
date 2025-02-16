@@ -3,10 +3,10 @@
  * @param args - The first argument is the message, followed by ANSI color codes.
  * @returns A formatted string with ANSI color codes.
  */
-export const Raw = (msg: string, ...colors: (number | string)[]): string => {
-	if (!colors.length) return msg;
+export const Raw = (msg: number | string, ...colors: (number | string)[]): string => {
+	if (!colors.length) return msg.toString();
 	const colorCode = colors.join(";");
-	return `\x1b[${colorCode}m${msg}\x1b[0m`;
+	return `\x1b[${colorCode}m${msg.toString()}\x1b[0m`;
 };
 
 /**
@@ -23,32 +23,32 @@ export const Custom = (...args: Parameters<typeof Raw>) => {
 * @returns A formatted string with special format
 * .
 */
-export const Ely = (msg: string): string => Raw(msg, 3, 31);
+export const Ely = (msg: number | string): string => Raw(msg, 3, 31);
 
 /**
 * Logs an **ID** message in orange.
 * @param msg - The message to log.
 * @returns A formatted string with orange color.
 */
-export const IdR = (msg: string): string => Raw(msg, 33);
+export const IdR = (msg: number | string): string => Raw(msg, 33);
 
 /**
 * Logs a **date** message in purple.
 * @param msg - The message to log.
 * @returns A formatted string with purple color.
 */
-export const DaR = (msg: string): string => Raw(msg, 34);
+export const DaR = (msg: number | string): string => Raw(msg, 34);
 
 /**
 * Logs an **error** message in red.
 * @param msg - The message to log.
 * @returns A formatted string with red color.
 */
-export const ErR = (msg: string): string => Raw(msg, 91);
+export const ErR = (msg: number | string): string => Raw(msg, 91);
 
 /**
 * Logs an **error** message in red.
 * @param msg - The message to log.
 * @returns A formatted string with red color.
 */
-export const LiR = (msg: string): string => Raw(msg, 94);
+export const LiR = (msg: number | string): string => Raw(msg, 94);
