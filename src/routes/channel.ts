@@ -11,12 +11,11 @@ interface UserType { //TODO: refractor this shit to ../middleware/auth.ts
 	id: any;
 }
 
-const channelRoutes =
-	// authenticate
-	new Elysia().use(authenticate)
+const channelRoutes = new Elysia().use(authenticate) //TODO: clean up (0 times)
 
-		//! Create a channel ------------------
-		.post('/server/channel', async ({ body, user, set }: { body: any; user: UserType; set: any }) => {
+	//! Create a channel ------------------
+	.post('/server/channel', //* Tested - GOOD
+		async ({ body, user, set }: { body: any; user: UserType; set: any }) => {
 			log.stamp(log.PathR() + 'Creating Channel')
 
 			// const { serverId } = params as { serverId: string }
@@ -54,26 +53,41 @@ const channelRoutes =
 			log.stamp(log.PathR() + `Channel ${log.Raw(name, 96)} created at server ${log.Raw(server.name, 96)} `)
 			return { success: true, channel }
 		}, {
-			body: t.Object({ name: t.String(), serverId: t.String() }),
-		})
+		body: t.Object({ name: t.String(), serverId: t.String() }),
+	})
 
-		//! Fetch all channel on a server ---------------
-		.get('/server/channels', async ({ body, set }) => {
+	//! Fetch all channel on a server ---------------
+	.get('/server/channels', //* Tested - GOOD
+		//TODO: might change to /:serverId/channel
+		async (
+			{ query, body, user, set }: { query: { serverId: string }, body: any; user: UserType; set: any } // use query instead, GET does NOT accept body
+		) => {
 			log.stamp(log.PathR() + 'Fetching Channels')
-
 			// const { serverId } = params as { serverId: string }
-			const { serverId } = body as { serverId: string }
 
-			const server = await Server.findById(serverId).populate('channels') //TODO: learn about .populate
+			const thisUser = await User.findById(user.id);
+			if (!thisUser) return { error: 'User not found' }
+			log.stamp(log.PathR() + `Requested by ${log.Raw(thisUser.username, 96)}`)
+			
+			const { serverId } = query
+			const server = await Server.findById(serverId)
+				//* populate: get full info of an object then replace the original id
+				.populate('channels') //TODO: learn more about .populate (cigu) 
 			if (!server) {
+				log.stamp(log.PathR() + `Server not found. ID: ${log.Raw(serverId, 96)}`)
 				set.status = 404;
 				return { error: 'Server not found' }
 			}
-			return { success: true, channels: server.channels }
-		})
+			log.stamp(log.PathR() + `Server ${log.Raw(server.name, 96)} has ${log.Raw(server.channels.length, 96)} channels. ID: ${log.Raw(serverId, 96)}`)
+			return { success: true, name: server.name, channels: server.channels }
+		}, {
+		// body: t.Object({ serverId: t.String() }),
+		query: t.Object({ serverId: t.String() }),
+	})
 
-		//! Delete a channel -------------
-		.delete('/server/channel', async ({ body, user, set }: { body: any, user: UserType, set: any }) => {
+	//! Delete a channel -------------
+	.delete('/server/channel',
+		async ({ body, user, set }: { body: any, user: UserType, set: any }) => {
 			log.stamp(log.PathR() + 'Deleting Channel')
 
 			const { serverId } = body as { serverId: string }
@@ -102,8 +116,8 @@ const channelRoutes =
 			await Channel.findByIdAndDelete(channelId);
 
 		}, {
-			body: t.Object({ channelId: t.String() }),
-		})
+		body: t.Object({ channelId: t.String() }),
+	})
 
 // .post('/test', () => {
 // 	console.log('testing')
