@@ -42,7 +42,7 @@ const channelRoutes = new Elysia().use(authenticate) //TODO: clean up (0 times)
 
 			//* Owner can create - tested - GOOD
 			if (server.owner.toString() !== user.id) {
-				log.stamp(log.PathR() + `Peasant testing. ID: ${log.Raw(thisUser.username, 96)}`)
+				log.stamp(log.PathR() + `Peasant trying. ID: ${log.Raw(thisUser.username, 96)}`)
 				set.status = 403
 				return { error: 'Only owner can create channel' } //TODO: on roles system creation
 			}
@@ -68,7 +68,7 @@ const channelRoutes = new Elysia().use(authenticate) //TODO: clean up (0 times)
 			const thisUser = await User.findById(user.id);
 			if (!thisUser) return { error: 'User not found' }
 			log.stamp(log.PathR() + `Requested by ${log.Raw(thisUser.username, 96)}`)
-			
+
 			const { serverId } = query
 			const server = await Server.findById(serverId)
 				//* populate: get full info of an object then replace the original id
@@ -86,20 +86,25 @@ const channelRoutes = new Elysia().use(authenticate) //TODO: clean up (0 times)
 	})
 
 	//! Delete a channel -------------
-	.delete('/server/channel',
+	.delete('/server/channel', //* Tested - GOOD
 		async ({ body, user, set }: { body: any, user: UserType, set: any }) => {
 			log.stamp(log.PathR() + 'Deleting Channel')
 
 			const { serverId } = body as { serverId: string }
+			const thisUser = await User.findById(user.id);
+			if (!thisUser) return { error: 'User not found' }
+			log.stamp(log.PathR() + `Requested by ${log.Raw(thisUser.username, 96)}`)
 
 			const server = await Server.findById(serverId).populate('channels')
 			if (!server) {
+				log.stamp(log.PathR() + `Server not found. ID: ${log.Raw(serverId, 96)}`)
 				set.status = 404;
 				return { error: 'Server not found' }
 			}
 
 			//* Owner can delete
 			if (server.owner.toString() !== user.id) {
+				log.stamp(log.PathR() + `Peasant trying. ID: ${log.Raw(thisUser.username, 96)}`)
 				set.status = 403
 				return { error: 'Only owner can delete channel' } //TODO: on roles system creation
 			}
@@ -107,6 +112,7 @@ const channelRoutes = new Elysia().use(authenticate) //TODO: clean up (0 times)
 			const { channelId } = body as { channelId: string };
 			const channel = await Channel.findById(channelId);
 			if (!channel) {
+				log.stamp(log.PathR() + `Server not found. ID: ${log.Raw(channelId, 96)}`)
 				set.status = 404;
 				return { error: 'Channel not found' }
 			}
@@ -114,14 +120,49 @@ const channelRoutes = new Elysia().use(authenticate) //TODO: clean up (0 times)
 			await Server.findByIdAndUpdate(server._id, { $pull: { channels: channel._id } });
 			//* Delete the channel
 			await Channel.findByIdAndDelete(channelId);
-
+			log.stamp(log.PathR() + `Channel ${log.Raw(channel.name, 96)} from ${log.Raw(server.name, 96)} deleted. ID: ${log.Raw(channelId, 96)}`)
 		}, {
-		body: t.Object({ channelId: t.String() }),
+		body: t.Object({ serverId: t.String(), channelId: t.String() }),
 	})
 
-// .post('/test', () => {
-// 	console.log('testing')
-// 	return { success: true }
-// })
+	//! VERY CAREFUL WHEN RUN THIS
+	//! Purge channels -------------
+	.delete('/server/channels/purge', //* Tested - GOOD
+		async ({ body, user, set }: { body: any, user: UserType, set: any }) => {
+			log.stamp(log.PathR() + 'Purging Channels ')
+
+			const { serverId } = body as { serverId: string }
+			const thisUser = await User.findById(user.id);
+			if (!thisUser) return { error: 'User not found' }
+			log.stamp(log.PathR() + `Requested by ${log.Raw(thisUser.username, 96)}`)
+
+			const server = await Server.findById(serverId).populate('channels')
+			if (!server) {
+				log.stamp(log.PathR() + `Server not found. ID: ${log.Raw(serverId, 96)}`)
+				set.status = 404;
+				return { error: 'Server not found' }
+			}
+
+			const { name, channelIdBypass } = body as { name: string, channelIdBypass: string }
+			const deletedChannels = await Channel.find({ name: name, _id: { $nin: [channelIdBypass, '67b21924f260c68e2b037b12'] } }).select('_id'); //$ne: query for 'not equal'
+			const deleteResult = await Channel.deleteMany({ name: name, _id: { $nin: [channelIdBypass, '67b21924f260c68e2b037b12'] } })
+
+			if (deleteResult.deletedCount > 0) {
+				const deletedChannelIds = deletedChannels.map(channel => channel._id)
+				const updateServer = await Server.findByIdAndUpdate(server._id, {
+					$pull: {
+						channels: { $in: deletedChannelIds }
+					}
+				})
+				log.stamp(log.PathR() + `Purged ${log.IdR(deleteResult.deletedCount.toString())} channels with name ${log.Raw(name, 96)} from ${log.Raw(server.name, 96)}`)
+				return { success: true, message: `Deleted ${deleteResult.deletedCount} channel from ${server.name} with name "${name}".` };
+
+			} else {
+				log.stamp(log.PathR() + `Purged ${log.IdR(deleteResult.deletedCount.toString())} channels with name ${log.Raw(name, 96)} from ${log.Raw(server.name, 96)}`)
+				return { success: true, message: `Deleted ${deleteResult.deletedCount} channel from ${server.name} with name "${name}".` };
+			}
+		}, {
+		body: t.Object({ serverId: t.String(), channelIdBypass: t.String(), name: t.String() }),
+	})
 
 export default channelRoutes;
