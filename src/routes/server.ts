@@ -118,7 +118,7 @@ const serverRoutes =
 			} else {
 				log.stamp(log.PathR() + `Purged ${log.IdR(deleteResult.deletedCount.toString())} Servers`)
 				set.status = 404;
-				return { success: false, message: `No servers found with name "${name}".` };
+				return { success: true, message: `No servers found with name "${name}".` };
 			}
 		});
 
