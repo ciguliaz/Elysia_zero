@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia';
 import { authenticate } from '../middleware/auth';
+import { ServerService } from '../services/ServerService';
 import Server from '../models/Server';
 import User from '../models/User';
 
@@ -7,7 +8,7 @@ import * as log from '../utils/log';
 import type { ObjectId } from 'mongoose';
 
 interface UserType {
-	id: ObjectId;
+	id: string;
 }
 
 const serverRoutes =
@@ -16,18 +17,8 @@ const serverRoutes =
 		//! Create a new server --------------
 		.post('/server', async ({ body, user }: { body: any; user: UserType }) => {  //* Tested - GOOD
 			log.stamp(log.PathR() + 'Creating Server')
-
-			if (!user) {
-				log.stamp(log.PathR() + `${log.ErR('Failed getting user')}: ${user}`)
-				return { error: "Unauthorized post/server" };  //  Ensure user is defined
-			}
-
 			const { name, description } = body as { name: string; description?: string }
-			const server = await Server.create({ name, description, owner: user.id, member: [user.id] })
-			await User.findByIdAndUpdate(user.id, { $push: { servers: server._id } })
-
-			log.stamp(log.PathR() + `Server Created: ${log.Raw(name, 96)} \n`)
-			return { success: true, server }
+			return await ServerService.createServer(name, description, user)
 		}, {
 			body: t.Object({ name: t.String(), description: t.Optional(t.String()) })
 		})
