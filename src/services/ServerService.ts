@@ -1,4 +1,5 @@
-import { ServerRepository } from "../repositories/ServerRepository";
+import { ServerRepository as ServRep } from "../repositories/ServerRepository";
+import { UserRepository as UserRep } from "../repositories/UserRepository";
 import * as log from '../utils/log';
 
 export class ServerService {
@@ -13,13 +14,11 @@ export class ServerService {
 	 */
 	static async createServer //* tested
 		(name: string, description: string | null | undefined, user: { id: string }) {
-
 		if (!user) {
 			log.stamp(log.PathR() + `${log.ErR('Failed getting user')}: ${user}`)
 			return { error: "Unauthorized user" };  //  Ensure user is defined
 		}
-
-		const server = await ServerRepository.createServer(name, description || '', user.id)
+		const server = await ServRep.createServer(name, description || '', user.id)
 		if ('error' in server) {
 			log.stamp(log.PathR() + `Server Creating Failed with error ${log.ErR(server.error)} \n`)
 			return { success: false, error: server.error }
@@ -28,24 +27,82 @@ export class ServerService {
 		return { success: true, server: server }
 	}
 
-	// User joins a server
-	static async joinServer(serverId: string, userId: string) {
-		const server = await ServerRepository.findServerById(serverId);
+	//! User joins a server
+	/**
+	 * Adds a user to a server.
+	 * This function adds a user to a server, if they are not already a member.
+	 * @param serverId The ID of the server.
+	 * @param user The user to add to the server.
+	 * @returns An object indicating success or failure, with a message.
+	 */
+	static async joinServer //* tested
+		(serverId: string, user: { id: string }) {
+		if (!user) {
+			log.stamp(log.PathR() + `${log.ErR('Failed getting user')}: ${user}`)
+			return { error: "Unauthorized user" };  //  Ensure user is defined
+		}
+		const thisUser = await UserRep.findUserById(user.id);
+		if (!thisUser) return { error: 'User not found' }
+		const server = await ServRep.findServerById(serverId);
 		if (!server) return { error: "Server not found" };
 
-		if (!server.members.map(toString).includes(userId)) {
-			await ServerRepository.addUserToServer(serverId, userId);
+		if (!server.members.map(e => e.toString()).includes(user.id)) {
+			await ServRep.addUserToServer(serverId, user.id);
+			log.stamp(log.PathR() + `${log.Raw(thisUser.username, 96)} Joined Server ${log.Raw(server.name, 96)} `)
 			return { success: true, message: "Joined the server" };
 		}
+		log.stamp(log.PathR() + `${log.Raw(thisUser.username, 96)} Is Already In The Server ${log.Raw(server.name, 96)} `)
 		return { success: false, message: "Already in the server" };
 	}
 
-	// User leaves a server
-	static async leaveServer(serverId: string, userId: string) {
-		const server = await ServerRepository.findServerById(serverId);
+	//! User leaves a server
+	/**
+	 * Removes a user from a server.
+	 * This function removes a user from a server, if they are currently a member.
+	 * @param serverId The ID of the server.
+	 * @param user The user to remove from the server.
+	 * @returns An object indicating success or failure, with a message.
+	 */
+	static async leaveServer //* tested
+		(serverId: string, user: { id: string }) {
+		if (!user) {
+			log.stamp(log.PathR() + `${log.ErR('Failed getting user')}: ${user}`)
+			return { error: "Unauthorized user" };  //  Ensure user is defined
+		}
+		const thisUser = await UserRep.findUserById(user.id);
+		if (!thisUser) return { error: 'User not found' }
+		const server = await ServRep.findServerById(serverId);
 		if (!server) return { error: "Server not found" };
 
-		await ServerRepository.removeUserFromServer(serverId, userId);
-		return { success: true, message: "Left the server" };
+		if (server.members.map(e => e.toString()).includes(user.id)) {
+			await ServRep.removeUserFromServer(serverId, user.id);
+			log.stamp(log.PathR() + `${log.Raw(thisUser.username, 96)} Left Server ${log.Raw(server.name, 96)} `)
+			return { success: true, message: "Left the server" };
+		}
+		log.stamp(log.PathR() + `${log.Raw(thisUser.username, 96)} Is Already not In The Server ${log.Raw(server.name, 96)} `)
+		return { success: false, message: "Already not in the server" };
+	}
+
+	/**
+	 * Fetches the servers a user is a member of.
+	 * This function retrieves all servers associated with a given user ID.
+	 * @param user The user whose servers are to be fetched.
+	 * @returns An object containing the servers or an error message if the user is not found.
+	 */
+	static async fetchServersOfUser
+		(user: { id: string }) {
+		if (!user) {
+			log.stamp(log.PathR() + `${log.ErR('Failed getting user')}: ${user}`)
+			return { error: "Unauthorized user" };  //  Ensure user is defined
+		}
+		const thisUser = await UserRep.findUserById(user.id);
+		if (!thisUser) return { error: 'User not found' }
+		log.stamp(log.PathR() + `Fetching servers of ${log.Raw(thisUser.username, 96)}`)
+
+		const servers = await ServRep.findServersByUserId(user.id)
+		log.stamp(log.PathR() + `${log.Raw(thisUser.username, 96)} is currently in ${log.IdR(servers.length)} Servers`)
+
+		console.log(servers)
+		return { success: true, servers: servers }
 	}
 }

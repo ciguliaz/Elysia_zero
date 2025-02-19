@@ -1,3 +1,4 @@
+import type { FilterQuery } from "mongoose";
 import Server from "../models/Server";
 import User from "../models/User";
 export class ServerRepository {
@@ -13,16 +14,36 @@ export class ServerRepository {
 	 */
 	static async createServer(name: string, description: string, ownerId: string) {
 		if (!name || name.trim() === '') {
-			return { error: 'Server name cannot be empty or contain only whitespace.' }
+			return { error: 'Server name cannot be empty or contain only whitespace.' };
 		}
 		if (!ownerId || ownerId.trim() === '') {
-			return { error: 'Owner ID cannot be empty or contain only whitespace.' }
+			return { error: 'Owner ID cannot be empty or contain only whitespace.' };
 		}
-		return await Server.create({ name, description, owner: ownerId, member: [ownerId] })
+		return await Server.create({ name, description, owner: ownerId, member: [ownerId] });
 	}
 
 	static async findServerById(serverId: string) {
 		return await Server.findById(serverId);
+	}
+
+	/**
+	 * Finds servers by user ID.
+	 * This function retrieves all servers that a given user is a member ```typescript of.
+	 * @param userId - The ID of the user to search for.
+	 * @returns A promise that resolves to an array of servers.
+	 */
+	static async findServersByUserId(userId: string) {
+		return await Server.find({ members: userId });
+	}
+
+	/**
+	 * Finds servers based on a given query.
+	 * This function retrieves servers that match the provided query.
+	 * @param query - The query to use for finding servers.
+	 * @returns A promise that resolves to an array of servers matching the query.
+	 */
+	static async findServersByQuery(query: FilterQuery<typeof Server.schema.obj>) {
+		return await Server.find(query);
 	}
 
 	// Add user to a server
@@ -30,7 +51,6 @@ export class ServerRepository {
 		await Server.findByIdAndUpdate(serverId, { $push: { members: userId } });
 		await User.findByIdAndUpdate(userId, { $push: { servers: serverId } });
 	}
-
 	// Remove user from a server
 	static async removeUserFromServer(serverId: string, userId: string) {
 		await Server.findByIdAndUpdate(serverId, { $pull: { members: userId } });
