@@ -23,7 +23,7 @@ export const PathR = () => {
 	const workspaceRoot = process.cwd();
 	// console.log("Workspace root:", workspaceRoot); // Debugging
 
-	const relativePath = callerPath !== "Unknown" ? path.relative(workspaceRoot, callerPath) : "Unknown";
+	const relativePath = callerPath !== "Unknown" ? path.relative(workspaceRoot, callerPath).slice(3) : "Unknown";
 	// console.log("Final relative path:", relativePath); // Debugging
 
 	return log.LiR(relativePath) + ': '
