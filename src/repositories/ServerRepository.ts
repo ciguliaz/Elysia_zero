@@ -1,4 +1,4 @@
-import type { FilterQuery } from "mongoose";
+import type { FilterQuery, UpdateQuery } from "mongoose";
 import Server from "../models/Server";
 import User from "../models/User";
 export class ServerRepository {
@@ -44,6 +44,10 @@ export class ServerRepository {
 	 */
 	static async findServersByQuery(query: FilterQuery<typeof Server.schema.obj>) {
 		return await Server.find(query);
+	}
+
+	static async findServersByIdAndUpdate(serverId: string, update: UpdateQuery<typeof Server.schema.obj>) {
+		return await Server.findByIdAndUpdate(serverId, update);
 	}
 
 	// Add user to a server
