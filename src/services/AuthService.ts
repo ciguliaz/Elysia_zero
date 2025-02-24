@@ -5,7 +5,7 @@ import { ErR, Raw } from "../utils/logFormat";
 
 
 //TODO: handle duplicate username register
-
+//TODO: refractor to auth repo
 export const register = async (username: string, password: string) => {
 	const hashedPassword = await bcrypt.hash(password, 10);
 	const newUser = new User({ username, password: hashedPassword });
