@@ -1,8 +1,6 @@
 import { Elysia, t } from 'elysia';
 import { authenticate } from '../middleware/auth';
 import { ServerService } from '../services/ServerService';
-import Server from '../models/Server';
-import User from '../models/User';
 import * as log from '../utils/log';
 
 interface UserType {
@@ -47,26 +45,12 @@ const serverRoutes =
 
 		//! VERY CAREFUL WHEN RUN THIS
 		//! Purge server of specific name
-		.delete('/servers/purge', async ({ body, set }) => { //* Tested - GOOD
+		.delete('/servers/purge', async ({ body, set }) => { //* tested
 			log.stamp(log.PathR() + `Purging Servers`)
-			const { name } = body as { name: string };
-
-			const deletedServers = await Server.find({ name: name, _id: { $ne: '67a73b63d2d136bf2dc05a47' } }).select('_id'); //$ne: query for 'not equal'
-			const deleteResult = await Server.deleteMany({ name: name, _id: { $ne: '67a73b63d2d136bf2dc05a47' } })
-
-			if (deleteResult.deletedCount > 0) {
-				const deletedServerIds = deletedServers.map(server => server._id);
-				const updatedUser = await User.updateMany(
-					{ servers: { $in: deletedServerIds } },  // Find users who have these servers
-					{ $pull: { servers: { $in: deletedServerIds } } }  // Remove them from the `servers` field
-				);
-				log.stamp(log.PathR() + `Purged ${log.IdR(deleteResult.deletedCount.toString())} Servers; Updated ${log.IdR(updatedUser.modifiedCount.toString())} Users`)
-				return { success: true, message: `Deleted ${deleteResult.deletedCount} servers with name "${name}".` };
-			} else {
-				log.stamp(log.PathR() + `Purged ${log.IdR(deleteResult.deletedCount.toString())} Servers`)
-				set.status = 404;
-				return { success: true, message: `No servers found with name "${name}".` };
-			}
+			const { name } = body;
+			return await ServerService.purgeServers(name, set)
+		}, {
+			body: t.Object({ name: t.String() })
 		});
 
 export default serverRoutes

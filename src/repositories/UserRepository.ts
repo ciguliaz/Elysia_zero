@@ -1,4 +1,4 @@
-import type { FilterQuery } from "mongoose";
+import type { FilterQuery, UpdateQuery } from "mongoose";
 import Server from "../models/Server";
 import User from "../models/User";
 
@@ -15,6 +15,10 @@ export class UserRepository {
 	}
 	static async findUsersByQuery(query: FilterQuery<typeof User.schema.obj>) {
 		return await User.find(query);
+	}
+
+	static async updateManyUser(query: FilterQuery<typeof User.schema.obj>, update: UpdateQuery<typeof User.schema.obj>) {
+		return await User.updateMany(query, update);
 	}
 }
 

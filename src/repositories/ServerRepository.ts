@@ -42,8 +42,8 @@ export class ServerRepository {
 	 * @param query - The query to use for finding servers.
 	 * @returns A promise that resolves to an array of servers matching the query.
 	 */
-	static async findServersByQuery(query: FilterQuery<typeof Server.schema.obj>) {
-		return await Server.find(query);
+	static findServersByQuery(query: FilterQuery<typeof Server.schema.obj>) {
+		return Server.find(query);
 	}
 
 	static async findServerByIdAndUpdate(serverId: string, update: UpdateQuery<typeof Server.schema.obj>) {
@@ -59,5 +59,9 @@ export class ServerRepository {
 	static async removeUserFromServer(serverId: string, userId: string) {
 		await Server.findByIdAndUpdate(serverId, { $pull: { members: userId } });
 		await User.findByIdAndUpdate(userId, { $pull: { servers: serverId } });
+	}
+
+	static async deleteManyServer(query: FilterQuery<typeof Server.schema.obj>) {
+		return await Server.deleteMany(query);
 	}
 }

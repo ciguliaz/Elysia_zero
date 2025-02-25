@@ -3,11 +3,10 @@ import { authenticate } from "../middleware/auth";
 import { ChannelService } from "../services/ChannelService";
 import * as log from '../utils/log';
 
-
 interface UserType { //TODO: refractor this shit to ../middleware/auth.ts
 	id: any;
 }
-
+ 
 const channelRoutes = new Elysia().use(authenticate) //TODO: clean up (1 times)
 
 	//! Create a channel ------------------

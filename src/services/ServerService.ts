@@ -89,7 +89,7 @@ export class ServerService {
 	 * @param user The user whose servers are to be fetched.
 	 * @returns An object containing the servers or an error message if the user is not found.
 	 */
-	static async fetchServersOfUser
+	static async fetchServersOfUser //* tested
 		(user: { id: string }) {
 		if (!user) {
 			log.stamp(log.PathR() + `${log.ErR('Failed getting user')}: ${user}`)
@@ -104,5 +104,28 @@ export class ServerService {
 
 		console.log(servers)
 		return { success: true, servers: servers }
+	}
+	static async purgeServers //* tested
+		(name: string, set: any) {
+
+		const deleteFilter = { name: name, _id: { $ne: '67a73b63d2d136bf2dc05a47' } } //$ne: query for 'not equal'
+		const deletedServers = await ServRep.findServersByQuery(deleteFilter).select('_id');
+		const deleteResult = await ServRep.deleteManyServer(deleteFilter)
+		const curLog = log.PathR() + `Purged ${log.IdR(deleteResult.deletedCount.toString())} Servers`
+
+		if (deleteResult.deletedCount > 0) {
+			const deletedServerIds = deletedServers.map(server => server._id);
+			const updatedUser = await UserRep.updateManyUser(
+				{ servers: { $in: deletedServerIds } },  // Find users who have these servers
+				{ $pull: { servers: { $in: deletedServerIds } } }  // Remove them from the `servers` field
+			);
+			log.stamp(curLog + `; Updated ${log.IdR(updatedUser.modifiedCount.toString())} Users`)
+			return { success: true, message: `Deleted ${deleteResult.deletedCount} servers with name "${name}".` };
+		} else {
+			log.stamp(curLog)
+			set.status = 404;
+			return { success: true, message: `No servers found with name "${name}".` };
+		}
+
 	}
 }
