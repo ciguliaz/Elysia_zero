@@ -105,4 +105,49 @@ export class ChannelService {
 		log.stamp(log.PathR() + `Channel ${log.Raw(channel.name, 96)} from ${log.Raw(server.name, 96)} deleted. ID: ${log.Raw(channelId, 96)}`)
 		return { success: true }
 	}
+
+	/**
+	 * Purges channels from a server based on a given name, excluding a specified channel.
+	 * Only the server owner can purge channels.
+	 * @param serverId The ID of the server.
+	 * @param name The name of the channels to purge.
+	 * @param channelIdBypass The ID of the channel to exclude from purging.
+	 * @param user The user requesting the purge.
+	 * @param set The response object.
+	 * @returns An object indicating success and a message with the number of deleted channels.
+	 */
+	static async purgeChannels
+		(serverId: string, name: string, channelIdBypass: string, user: { id: string }, set: any) {
+		//TODO: handle no bypass
+
+		const thisUser = await UserRep.findUserById(user.id);
+		if (!thisUser) return { error: 'User not found' }
+		log.stamp(log.PathR() + `Requested by ${log.Raw(thisUser.username, 96)}`)
+
+		const server = await ServRep.findServerById(serverId).populate('channels')
+		if (!server) {
+			log.stamp(log.PathR() + `Server not found. ID: ${log.Raw(serverId, 96)}`)
+			set.status = 404;
+			return { error: 'Server not found' }
+		}
+
+		const deleteFilter = { name: name, _id: { $nin: [channelIdBypass, '67b21924f260c68e2b037b12'] } }
+		const deletedChannels = await ChanRep.findChannelByQuery(deleteFilter).select('_id'); //$ne: query for 'not equal'
+		const deleteResult = await ChanRep.deleteManyChannel(deleteFilter)
+
+		if (deleteResult.deletedCount > 0) {
+			const deletedChannelIds = deletedChannels.map(channel => channel._id)
+			const updateServer = await ServRep.findServerByIdAndUpdate(server._id.toString(), {
+				$pull: {
+					channels: { $in: deletedChannelIds }
+				}
+			})
+			log.stamp(log.PathR() + `Purged ${log.IdR(deleteResult.deletedCount.toString())} channels with name ${log.Raw(name, 96)} from ${log.Raw(server.name, 96)}.`)
+			return { success: true, message: `Deleted ${deleteResult.deletedCount} channel from ${server.name} with name "${name}".` };
+
+		} else {
+			log.stamp(log.PathR() + `Purged ${log.IdR(deleteResult.deletedCount.toString())} channels with name ${log.Raw(name, 96)} from ${log.Raw(server.name, 96)}.`)
+			return { success: true, message: `Deleted ${deleteResult.deletedCount} channel from ${server.name} with name "${name}".` };
+		}
+	}
 }

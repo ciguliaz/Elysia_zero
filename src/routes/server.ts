@@ -52,9 +52,7 @@ const serverRoutes =
 			const { name } = body as { name: string };
 
 			const deletedServers = await Server.find({ name: name, _id: { $ne: '67a73b63d2d136bf2dc05a47' } }).select('_id'); //$ne: query for 'not equal'
-
 			const deleteResult = await Server.deleteMany({ name: name, _id: { $ne: '67a73b63d2d136bf2dc05a47' } })
-			// log.stamp(log.PathR() + `Purged ${ log.IdR(deleteResult.deletedCount.toString()) } Servers`)
 
 			if (deleteResult.deletedCount > 0) {
 				const deletedServerIds = deletedServers.map(server => server._id);

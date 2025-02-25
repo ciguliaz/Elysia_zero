@@ -14,5 +14,13 @@ export class ChannelRepository {
 		return Channel.findByIdAndDelete(channelId);
 	}
 
+	static findChannelByQuery(query: FilterQuery<typeof Channel.schema.obj>) {
+		return Channel.find(query);
+	}
+
+	static deleteManyChannel(query: FilterQuery<typeof Channel.schema.obj>) {
+		return Channel.deleteMany(query)
+	}
+
 
 }
