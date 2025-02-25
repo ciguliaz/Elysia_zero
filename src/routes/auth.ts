@@ -1,6 +1,6 @@
 import jwt from "@elysiajs/jwt";
 import { Elysia, t } from "elysia";
-import { login, register } from "../controllers/authController";
+import { login, register } from '../services/AuthService';
 import * as log from '../utils/log';
 
 
