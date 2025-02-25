@@ -22,8 +22,8 @@ export class ServerRepository {
 		return await Server.create({ name, description, owner: ownerId, member: [ownerId] });
 	}
 
-	static async findServerById(serverId: string) {
-		return await Server.findById(serverId);
+	static findServerById(serverId: string) {
+		return Server.findById(serverId);
 	}
 
 	/**
@@ -46,7 +46,7 @@ export class ServerRepository {
 		return await Server.find(query);
 	}
 
-	static async findServersByIdAndUpdate(serverId: string, update: UpdateQuery<typeof Server.schema.obj>) {
+	static async findServerByIdAndUpdate(serverId: string, update: UpdateQuery<typeof Server.schema.obj>) {
 		return await Server.findByIdAndUpdate(serverId, update);
 	}
 
