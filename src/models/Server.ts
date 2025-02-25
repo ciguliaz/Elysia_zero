@@ -17,3 +17,11 @@ ServerSchema.pre('save', function (next) {
 });
 
 export default mongoose.model('Server', ServerSchema);
+export interface ServerType {
+  name: string;
+  description?: string;
+  owner: mongoose.Types.ObjectId;
+  members: mongoose.Types.ObjectId[];
+  channels: mongoose.Types.ObjectId[];
+  // timestamps are added automatically
+}
