@@ -11,36 +11,36 @@ const serverRoutes =
 	new Elysia().use(authenticate)
 
 		//* Create a new server --------------
-		.post('/server', async ({ body, user }: { body: any; user: UserType }) => {  //* Tested - GOOD
+		.post('/server', async ({ body, user, set }: { body: any; user: UserType, set: any }) => {  //* Tested - GOOD
 			log.stamp(log.PathR() + 'Creating Server')
 			const { name, description } = body as { name: string; description?: string }
-			return await ServerService.createServer(name, description, user)
+			return await ServerService.createServer(name, description, user, set)
 		}, {
 			body: t.Object({ name: t.String(), description: t.Optional(t.String()) })
 		})
 
 		//* Join -----------------
-		.post('/server/join', async ({ body, user }: { body: any; user: UserType }) => {   //* Tested - GOOD
+		.post('/server/join', async ({ body, user, set }: { body: any; user: UserType, set: any }) => {   //* Tested - GOOD
 			log.stamp(log.PathR() + 'Joining Server')
 			const { serverId } = body as { serverId: string }
-			return await ServerService.joinServer(serverId, user)
+			return await ServerService.joinServer(serverId, user, set)
 		}, {
 			body: t.Object({ serverId: t.String() })
 		})
 
 		//* Leave -------------------
-		.post("/server/leave", async ({ body, user }: { body: any; user: UserType }) => {   //* Tested - GOOD
+		.post("/server/leave", async ({ body, user, set }: { body: any; user: UserType, set: any }) => {   //* Tested - GOOD
 			log.stamp(log.PathR() + 'Leaving Server')
 			const { serverId } = body as { serverId: string };
-			return await ServerService.leaveServer(serverId, user)
+			return await ServerService.leaveServer(serverId, user, set)
 		}, {
 			body: t.Object({ serverId: t.String() })
 		})
 
 		//* Get servers this user is part of --------------
-		.get('/servers', async ({ user }: { user: UserType }) => {  //* Tested - GOOD
+		.get('/servers', async ({ user, set }: { user: UserType; set: any }) => {  //* Tested - GOOD
 			log.stamp(log.PathR() + 'Getting Servers list')
-			return await ServerService.fetchServersOfUser(user)
+			return await ServerService.fetchServersOfUser(user, set)
 		})
 
 		//! VERY CAREFUL WHEN RUN THIS

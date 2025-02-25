@@ -1,35 +1,17 @@
+import { ChannelRepository as ChanRep } from "../repositories/ChannelRepository";
 import { ServerRepository as ServRep } from "../repositories/ServerRepository";
-import { ChannelRepository as ChanRep } from "../repositories/ChannelRepository"
 import { UserRepository as UserRep } from "../repositories/UserRepository";
+import { Validate } from "../utils/Validate";
 import * as log from '../utils/log';
 
 export class ChannelService {
 	//Create new channel from given server id
 	static async createChannel
 		(name: string, serverId: string, user: { id: string }, set: any) {
-		if (!user) {
-			log.stamp(log.PathR() + `${log.ErR('Failed getting user')}: ${user}`)
-			return { error: "Unauthorized user" };  //  Ensure user is defined
-		}
-
-		const thisUser = await UserRep.findUserById(user.id);
-		if (!thisUser) return { error: 'User not found' }
-		log.stamp(log.PathR() + `Requested by ${log.Raw(thisUser.username, 96)}`)
-
-		//* Validate server id (mongoDB ObjectId standard 24 hex digit) - tested - GOOD
-		if (!/^[0-9a-f]{24}$/.test(serverId)) {
-			log.stamp(log.PathR() + `Invalid server id. ID: ${log.Raw(serverId, 96)}`)
-			set.status = 404;
-			return { error: 'Invalid server id' }
-		}
-
-		//* Find server for channel - tested - GOOD
-		const server = await ServRep.findServerById(serverId)
-		if (!server) {
-			log.stamp(log.PathR() + `Server not found. ID: ${log.Raw(serverId, 96)}`)
-			set.status = 404;
-			return { error: 'Server not found' }
-		}
+		const thisUser = await Validate.tryGetUser(user, set)
+		if ('error' in thisUser) return thisUser;
+		const server = await Validate.tryGetServer(serverId, set)
+		if ('error' in server) return server;
 
 		//* Owner can create - tested - GOOD
 		if (server.owner.toString() !== user.id) {
@@ -47,18 +29,11 @@ export class ChannelService {
 	}
 	static async fetchChannel
 		(serverId: string, user: { id: string }, set: any) {
-		const thisUser = await UserRep.findUserById(user.id);
-		if (!thisUser) return { error: 'User not found' }
-		log.stamp(log.PathR() + `Requested by ${log.Raw(thisUser.username, 96)}`)
+		const thisUser = await Validate.tryGetUser(user, set)
+		if ('error' in thisUser) return thisUser;
+		const server = await Validate.tryGetServer(serverId, set, { populate: 'channel' })
+		if ('error' in server) return server;
 
-		const server = await ServRep.findServerById(serverId)
-			//* populate: get full info of an object then replace the original id
-			.populate('channels') //TODO: learn more about .populate (cigu) 
-		if (!server) {
-			log.stamp(log.PathR() + `Server not found. ID: ${log.Raw(serverId, 96)}`)
-			set.status = 404;
-			return { error: 'Server not found' }
-		}
 		log.stamp(log.PathR() + `Server ${log.Raw(server.name, 96)} has ${log.Raw(server.channels.length, 96)} channels. ID: ${log.Raw(serverId, 96)}`)
 		return { success: true, name: server.name, channels: server.channels }
 	}
@@ -74,16 +49,10 @@ export class ChannelService {
 	 */
 	static async deleteChannel
 		(serverId: string, channelId: string, user: { id: string }, set: any) {
-		const thisUser = await UserRep.findUserById(user.id);
-		if (!thisUser) return { error: 'User not found' }
-		log.stamp(log.PathR() + `Requested by ${log.Raw(thisUser.username, 96)}`)
-
-		const server = await ServRep.findServerById(serverId).populate('channels')
-		if (!server) {
-			log.stamp(log.PathR() + `Server not found. ID: ${log.Raw(serverId, 96)}`)
-			set.status = 404;
-			return { error: 'Server not found' }
-		}
+		const thisUser = await Validate.tryGetUser(user, set)
+		if ('error' in thisUser) return thisUser;
+		const server = await Validate.tryGetServer(serverId, set, { populate: 'channel' })
+		if ('error' in server) return server;
 
 		//* Owner can delete
 		if (server.owner.toString() !== user.id) {
@@ -120,16 +89,10 @@ export class ChannelService {
 		(serverId: string, name: string, channelIdBypass: string, user: { id: string }, set: any) {
 		//TODO: handle no bypass
 
-		const thisUser = await UserRep.findUserById(user.id);
-		if (!thisUser) return { error: 'User not found' }
-		log.stamp(log.PathR() + `Requested by ${log.Raw(thisUser.username, 96)}`)
-
-		const server = await ServRep.findServerById(serverId).populate('channels')
-		if (!server) {
-			log.stamp(log.PathR() + `Server not found. ID: ${log.Raw(serverId, 96)}`)
-			set.status = 404;
-			return { error: 'Server not found' }
-		}
+		const thisUser = await Validate.tryGetUser(user, set)
+		if ('error' in thisUser) return thisUser;
+		const server = await Validate.tryGetServer(serverId, set, { populate: 'channel' })
+		if ('error' in server) return server;
 
 		const deleteFilter = { name: name, _id: { $nin: [channelIdBypass, '67b21924f260c68e2b037b12'] } }
 		const deletedChannels = await ChanRep.findChannelByQuery(deleteFilter).select('_id'); //$ne: query for 'not equal'
