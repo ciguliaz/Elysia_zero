@@ -4,10 +4,10 @@ import { Elysia } from 'elysia';
 import mongoose from 'mongoose';
 
 import authRoutes from './routes/auth';
-import channelRoutes from './routes/channel';
-import chat from './routes/chat';
 import serverRoutes from './routes/server';
-
+import channelRoutes from './routes/channel';
+import chatRoutes from './routes/chat';
+import chat from './routes/chat';
 
 import * as log from './utils/log';
 
@@ -24,7 +24,7 @@ app
 	.use(authRoutes)
 	.use(serverRoutes)
 	.use(channelRoutes)
-	.use(chat)
+	.use(chatRoutes)
 
 	.listen(3000);
 
