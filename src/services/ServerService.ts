@@ -20,11 +20,11 @@ export class ServerService {
 
 		const server = await ServRep.createServer(name, description || '', user.id)
 		if ('error' in server) {
-			log.stamp(log.PathR() + `Server Creating Failed with error ${log.ErR(server.error)} \n`)
+			log.stamp(log.PathR() + `Server Creating Failed with error ${log.ErR(server.error)}`)
 			set.status = 418 //Tea pot
 			return { success: false, error: server.error }
 		}
-		log.stamp(log.PathR() + `Server Created: ${log.Raw(name, 96)} \n`)
+		log.stamp(log.PathR() + `Server Created: ${log.Raw(name, 96)}`)
 		return { success: true, server: server }
 	}
 
@@ -40,7 +40,7 @@ export class ServerService {
 		(serverId: string, user: { id: string }, set: any) {
 		const thisUser = await Validate.tryGetUser(user, set)
 		if ('error' in thisUser) return thisUser;
-		const server = await Validate.tryGetServer(serverId, set, { populate: 'channel' })
+		const server = await Validate.tryGetServer(serverId, set, { populate: 'channels' })
 		if ('error' in server) return server;
 
 		if (!server.members.map(e => e.toString()).includes(user.id)) {

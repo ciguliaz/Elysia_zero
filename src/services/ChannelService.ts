@@ -31,7 +31,7 @@ export class ChannelService {
 		(serverId: string, user: { id: string }, set: any) {
 		const thisUser = await Validate.tryGetUser(user, set)
 		if ('error' in thisUser) return thisUser;
-		const server = await Validate.tryGetServer(serverId, set, { populate: 'channel' })
+		const server = await Validate.tryGetServer(serverId, set, { populate: 'channels' })
 		if ('error' in server) return server;
 
 		log.stamp(log.PathR() + `Server ${log.Raw(server.name, 96)} has ${log.Raw(server.channels.length, 96)} channels. ID: ${log.Raw(serverId, 96)}`)
@@ -71,7 +71,7 @@ export class ChannelService {
 		await ServRep.findServerByIdAndUpdate(server._id.toString(), { $pull: { channels: channel._id } });
 		//* Delete the channel
 		await ChanRep.findChannelByIdAndDelete(channelId);
-		log.stamp(log.PathR() + `Channel ${log.Raw(channel.name, 96)} from ${log.Raw(server.name, 96)} deleted. ID: ${log.Raw(channelId, 96)}`)
+		log.stamp(log.PathR() + `Channel ${log.Raw(channel.name!, 96)} from ${log.Raw(server.name, 96)} deleted. ID: ${log.Raw(channelId, 96)}`)
 		return { success: true }
 	}
 

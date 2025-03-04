@@ -30,7 +30,7 @@ export const authenticate = new Elysia()
 			set: any;
 			body: any
 		}) => {
-			log.stamp(log.PathR() + 'Deriving Token')
+			log.stamp(log.PathR() + log.Raw('Deriving Token', 32))
 			const token = headers.authorization?.split(" ")[1]; //* Extracts token from "Bearer <token>"
 			if (!token) {
 				set.status = 401; //Unauthorized

@@ -3,8 +3,9 @@ import { UserRepository as UserRep } from '../repositories/UserRepository.ts';
 import * as log from './log.ts';
 
 export class Validate {
-	static async tryGetUser(user: { id: string }, set: any) {
+	static async tryGetUser(user: { id: string } | null | undefined, set: any) {
 		if (!user) {
+			//TODO: redirect to login page
 			log.stamp(`${log.PathR()} ${log.ErR('Failed getting user')}: ${user}`);
 			set.status = 401;
 			return { error: "Unauthorized user" };
@@ -17,6 +18,7 @@ export class Validate {
 
 	static async tryGetServer(serverId: string, set: any, options: { populate?: string } = {}) {
 		if (!/^[0-9a-f]{24}$/.test(serverId)) {
+			//TODO: redirect to /chat/@dm
 			log.stamp(`${log.PathR()}Invalid server id. ID: ${log.Raw(serverId, 96)}`);
 			set.status = 404;
 			return { error: 'Invalid server id' };
@@ -25,6 +27,7 @@ export class Validate {
 		if (options.populate) serverQuery = serverQuery.populate(options.populate);
 		const server = await serverQuery;
 		if (!server) {
+			//TODO: redirect to /chat/@dm
 			log.stamp(`${log.PathR()}Server not found. ID: ${log.Raw(serverId, 96)}`);
 			set.status = 404;
 			return { error: 'Server not found' };
