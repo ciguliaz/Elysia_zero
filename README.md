@@ -2,6 +2,14 @@
 
 ## chat application
 
+### Environment Requirement:
+- Runtime: Bun
+- .env file: at root folder, consist of
+MONGO_URI:
+JWT_SECRET:
+ENVIRONMENT:
+
+If your device don't have bun, refer to [this link](bun.sh/docs/installation) to install it
 
 To install dependencies:
 
@@ -9,7 +17,7 @@ To install dependencies:
 bun install
 ```
 
-To run:
+To start server:
 
 ```bash
 bun run start
